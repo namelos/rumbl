@@ -36,4 +36,15 @@ defmodule Rumbl.VideoControllerTest do
       assert conn.halted
     end)
   end
+
+  @tag login_as: "max"
+  test "lists all user's video on index", %{conn: conn, user: user} do
+    user_video = insert_video(user, title: "funny cats")
+    other_video = insert_video(insert_user(username: "other"), title: "another video")
+
+    conn = get conn, video_path(conn, :index)
+    assert html_response(conn, 200) =~ ~r/Listing videos/
+    assert String.contains?(conn.resp_body, user_video.title)
+    refute String.contains?(conn.resp_body, other_video.title)
+  end
 end
